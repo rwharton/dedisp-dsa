@@ -8,8 +8,6 @@ THRUST_DIR =/usr/local/thrust-1.7
 
 # LIB_ARCH   = lib
 LIB_ARCH   = lib64
-# GPU_ARCH   = sm_13
-# GPU_ARCH   = sm_20
 GPU_ARCH   = -gencode=arch=compute_75,code=sm_75
 
 GCC        = gcc
