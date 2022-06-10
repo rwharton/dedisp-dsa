@@ -1,4 +1,7 @@
 # dedisp
+
+Copy of DSA dedisp code.
+
 This repositry is derived from Ben Barsdell's original GPU De-dedispersion library (code.google.com/p/dedisp)
 
 Installation Instructions:
