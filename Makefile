@@ -1,3 +1,4 @@
+
 include Makefile.inc
 
 # Output directories
@@ -6,18 +7,14 @@ OBJ_DIR     = obj
 LIB_DIR     = lib
 INCLUDE_DIR = include
 
-# thrust and cuda
-#THRUST_DIR = /usr/local/thrust-1.7
-#CUDA_DIR = /usr/local/cuda-8.0
-
 SRC_DIR   := src
 #INC_DIR   := ./include
-OPTIMISE  := -O3 --gpu-architecture=sm_75
+OPTIMISE  := -O3
 # Note: Using -G makes the GPU kernel 16x slower!
 DEBUG     := -g -DDEDISP_DEBUG=$(DEDISP_DEBUG) #-G
 
 INCLUDE   := -I$(SRC_DIR) -I$(THRUST_DIR)
-LIB       := -L$(CUDA_DIR)/$(LIB_ARCH) -lcudart
+LIB       := -L$(CUDA_DIR)/$(LIB_ARCH) -lcudart -lstdc++
 
 SOURCES   := $(SRC_DIR)/dedisp.cu
 HEADERS   := $(SRC_DIR)/dedisp.h $(SRC_DIR)/kernels.cuh         \
@@ -42,9 +39,10 @@ all: shared
 shared: $(SO_NAME)
 
 $(SO_NAME): $(SOURCES) $(HEADERS)
+	mkdir -p $(INCLUDE_DIR)
 	mkdir -p $(LIB_DIR)
 	mkdir -p $(OBJ_DIR)
-	$(NVCC) -c -Xcompiler "-fPIC -Wall" $(OPTIMISE) $(DEBUG) $(INCLUDE) -o $(OBJ_DIR)/dedisp.o $(SRC_DIR)/dedisp.cu
+	$(NVCC) -c -Xcompiler "-fPIC -Wall" $(OPTIMISE) $(DEBUG) -arch=$(GPU_ARCH) $(INCLUDE) -o $(OBJ_DIR)/dedisp.o $(SRC_DIR)/dedisp.cu
 	$(GCC) -shared -Wl,--version-script=libdedisp.version,-soname,$(LIB_NAME)$(SO_EXT).$(MAJOR) -o $(SO_NAME) $(OBJ_DIR)/dedisp.o $(LIB)
 	ln -s -f $(SO_FILE) $(LIB_DIR)/$(LIB_NAME)$(SO_EXT).$(MAJOR)
 	ln -s -f $(SO_FILE) $(LIB_DIR)/$(LIB_NAME)$(SO_EXT)
@@ -54,7 +52,7 @@ $(SO_NAME): $(SOURCES) $(HEADERS)
 #static: $(A_NAME)
 
 #$(A_NAME): $(SRC_DIR)/dedisp.cu $(HEADERS)
-#	$(NVCC) -c -Xcompiler "-fPIC -Wall" $(GPU_ARCH) $(OPTIMISE) $(DEBUG) -o $(OBJ_DIR)/dedisp.o $(SRC_DIR)/dedisp.cu
+#	$(NVCC) -c -Xcompiler "-fPIC -Wall" -arch=$(GPU_ARCH) $(OPTIMISE) $(DEBUG) -o $(OBJ_DIR)/dedisp.o $(SRC_DIR)/dedisp.cu
 #	$(AR) rcs $(A_NAME) $(OBJ_DIR)/dedisp.o
 #	cp $(INTERFACE) $(INCLUDE_DIR)
 #	cp $(CPP_INTERFACE) $(INCLUDE_DIR)
@@ -65,7 +63,7 @@ test: $(SO_NAME)
 ptx: $(PTX_NAME)
 
 $(PTX_NAME): $(SOURCES) $(LIB_DIR)/libdedisp.so $(HEADERS)
-	$(NVCC) -ptx -Xcompiler "-fPIC -Wall" $(OPTIMISE) $(DEBUG) $(INCLUDE) -o $(PTX_NAME) $(SRC_DIR)/dedisp.cu
+	$(NVCC) -ptx -Xcompiler "-fPIC -Wall" $(OPTIMISE) $(DEBUG) -arch=$(GPU_ARCH) $(INCLUDE) -o $(PTX_NAME) $(SRC_DIR)/dedisp.cu
 
 doc: $(SRC_DIR)/dedisp.h Doxyfile
 	$(DOXYGEN) Doxyfile
@@ -76,6 +74,6 @@ clean:
 install: all
 	cp $(INTERFACE) $(INSTALL_DIR)/include/
 	cp $(CPP_INTERFACE) $(INSTALL_DIR)/include/
-	cp $(SO_NAME) $(INSTALL_DIR)/lib/
+	#cp $(SO_NAME) $(INSTALL_DIR)/lib/
 	ln -s -f $(SO_FILE) $(INSTALL_DIR)/lib/$(LIB_NAME)$(SO_EXT).$(MAJOR)
 	ln -s -f $(SO_FILE) $(INSTALL_DIR)/lib/$(LIB_NAME)$(SO_EXT)
