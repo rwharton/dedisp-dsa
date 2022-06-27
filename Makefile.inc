@@ -6,7 +6,7 @@ INSTALL_DIR = .
 CUDA_DIR   = $(CUDA_PATH)
 THRUST_DIR = $(CUDA_DIR)/include
 
-GPU_ARCH   = sm_52
+GPU_ARCH   = sm_61
 
 LIB_ARCH   = lib64
 
