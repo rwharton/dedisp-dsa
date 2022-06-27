@@ -8,3 +8,5 @@ Installation Instructions:
   3.  make && make install
   
   This will build a shared object library named libdedisp.so which is a prerequisite for Heimdall
+
+NOTE: There are sm codes in Makefile.inc and Makefile that you may need to change
